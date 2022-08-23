@@ -26,21 +26,21 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
   }
 
   @SubscribeMessage('joinRoom')
-  joinRoom(@MessageBody() { room }: GameRoomDto, @ConnectedSocket() client: Socket) {
+  handleJoinRoom(@MessageBody() { room }: GameRoomDto, @ConnectedSocket() client: Socket) {
     client.join(room);
     console.log(`${client.id} joined to ${room}!`);
     client.emit('joinedRoom', { room });
   }
 
   @SubscribeMessage('leaveRoom')
-  leaveRoom(@MessageBody() { room }: GameRoomDto, @ConnectedSocket() client: Socket) {
+  handleLeaveRoom(@MessageBody() { room }: GameRoomDto, @ConnectedSocket() client: Socket) {
     client.leave(room);
     console.log(`${client.id} leaved from ${room}!`);
     client.emit('leavedRoom', { room });
   }
 
   @SubscribeMessage('message')
-  create(@MessageBody() { room, message }: GameMessageDto, @ConnectedSocket() client: Socket) {
+  handleMessage(@MessageBody() { room, message }: GameMessageDto, @ConnectedSocket() client: Socket) {
     console.log({ room, message });
     console.log({ clientRooms: client.rooms });
     this.server.to(room).emit('messageToClient', { message });
