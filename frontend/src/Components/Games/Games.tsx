@@ -1,11 +1,18 @@
-import React from "react";
+import React, { useContext, useEffect } from "react";
 import { Link } from "react-router-dom";
+import GamesServiceContext from "../../services/games.context";
 
 const Games = () => {
-  const [games, setGames] = React.useState([
-    { id: "codenames", name: "codenames" },
-  ]);
+  const [games, setGames] = React.useState([] as any[]);
+  const gamesService = useContext(GamesServiceContext);
 
+  useEffect(() => {
+    const loadGames = async () => {
+      const games = await gamesService.getGames();
+      setGames(games);
+    };
+    loadGames();
+  }, []);
   return (
     <ul>
       {games.map((game: any) => (

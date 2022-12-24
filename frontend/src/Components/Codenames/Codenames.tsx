@@ -1,40 +1,24 @@
-import React from "react";
+import React, { useContext, useEffect } from "react";
 import Board from "./Board/Board";
 
+import CodenamesServiceContext from "../../services/codenames.context";
+
 const Codenames = () => {
-  const [dictionary, setDictionary] = React.useState([]);
+  const [dictionary, setDictionary] = React.useState([] as string[]);
+
+  const codenamesService = useContext(CodenamesServiceContext);
+
+  useEffect(() => {
+    const loadWords = async () => {
+      const state = await codenamesService.getInitGameState();
+      setDictionary(state.words);
+    };
+    loadWords();
+  }, []);
 
   return (
     <div className="codenames-container">
-      <Board
-        dictionary={[
-          "1",
-          "2",
-          "3",
-          "4",
-          "5",
-          "6",
-          "7",
-          "8",
-          "9",
-          "10",
-          "11",
-          "12",
-          "13",
-          "14",
-          "15",
-          "16",
-          "17",
-          "18",
-          "19",
-          "20",
-          "21",
-          "22",
-          "23",
-          "24",
-          "25",
-        ]}
-      />
+      <Board dictionary={dictionary} />
     </div>
   );
 };

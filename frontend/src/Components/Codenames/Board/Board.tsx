@@ -10,7 +10,7 @@ const Board = ({ dictionary }: Props) => {
   return (
     <div className="codenames-board">
       {dictionary.map((w: string) => (
-        <Card word={w} />
+        <Card key={w} word={w} />
       ))}
     </div>
   );

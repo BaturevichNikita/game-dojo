@@ -1,6 +1,9 @@
 import React from "react";
 import Games from "../Games/Games";
 
+import GamesServiceContext from "../../services/games.context";
+import GamesService from "../../services/games.service";
+
 const Home = () => {
   return (
     <div>
@@ -8,7 +11,9 @@ const Home = () => {
         <h2>Home Page</h2>
       </div>
       <div>
-        <Games />
+        <GamesServiceContext.Provider value={GamesService}>
+          <Games />
+        </GamesServiceContext.Provider>
       </div>
     </div>
   );
