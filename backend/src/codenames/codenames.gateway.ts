@@ -7,15 +7,14 @@ import {
   WebSocketServer,
   ConnectedSocket,
 } from '@nestjs/websockets';
-import { GameService } from './game.service';
 import { Server, Socket } from 'socket.io';
 import { GameMessageDto, GameRoomDto } from './dto/game.dto';
 
-@WebSocketGateway({ namespace: '/codenames' })
-export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
-  @WebSocketServer() server: Server;
+const rooms = [];
 
-  constructor(private readonly gameService: GameService) {}
+@WebSocketGateway({ namespace: '/codenames' })
+export class CodenamesGateway implements OnGatewayConnection, OnGatewayDisconnect {
+  @WebSocketServer() server: Server;
 
   handleConnection(client: Socket) {
     console.log(`${client.id} connected!`);

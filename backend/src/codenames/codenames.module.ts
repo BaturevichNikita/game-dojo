@@ -1,11 +1,10 @@
 import { Module } from '@nestjs/common';
-import { CodenamesService } from 'src/services/codenames.service';
-import { Codenamesontroller } from './codenames.controller';
-import { GameModule } from './game/game.module';
+import { CodenamesController } from './codenames.controller';
+import { CodenamesGateway } from './codenames.gateway';
+import { CodenamesService } from './codenames.service';
 
 @Module({
-  imports: [GameModule],
-  controllers: [Codenamesontroller],
-  providers: [CodenamesService],
+  providers: [CodenamesGateway, CodenamesService],
+  controllers: [CodenamesController],
 })
 export class CodenamesModule {}
