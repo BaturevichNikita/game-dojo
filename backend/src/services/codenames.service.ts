@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
-import * as fs from 'fs';
+import { readFile } from 'fs/promises';
+import { join } from 'path';
 
 @Injectable()
 export class CodenamesService {
@@ -11,11 +12,9 @@ export class CodenamesService {
   }
 
   async _generateWordsFromDictionary(): Promise<string[]> {
-    const buffer = fs
-      .readFileSync('/Users/Uladzislau_Malakhau/Desktop/game-dojo/backend/src/services/dictionary.txt')
-      .toString();
-
-    const dictionary = buffer.replace(/\s/g, '').split(',');
+    const dictionaryPath = join(__dirname, 'dictionary.txt');
+    const dictionaryBuffer = await readFile(dictionaryPath);
+    const dictionary = dictionaryBuffer.toString().replace(/\s/g, '').split(',');
 
     const wordsSet = new Set();
     while (wordsSet.size < 25) {
