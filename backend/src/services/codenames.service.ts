@@ -15,12 +15,6 @@ export class CodenamesService {
     const dictionaryPath = join(__dirname, 'dictionary.txt');
     const dictionaryBuffer = await readFile(dictionaryPath);
     const dictionary = dictionaryBuffer.toString().replace(/\s/g, '').split(',');
-
-    const wordsSet = new Set();
-    while (wordsSet.size < 25) {
-      const word = dictionary[Math.floor(Math.random() * dictionary.length)];
-      wordsSet.add(word);
-    }
-    return Array.from(wordsSet) as string[];
+    return dictionary.shuffle().slice(0, 25);
   }
 }
