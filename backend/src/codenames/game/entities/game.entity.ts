@@ -1,1 +1,3 @@
-export class Game {}
+export interface Game {
+  words: string[];
+}
