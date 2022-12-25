@@ -1,7 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { readFile } from 'fs/promises';
 import { join } from 'path';
-import * as crypto from 'crypto';
 import { generateRandomWord } from 'src/utils/strings';
 
 type Words = {
@@ -35,8 +34,7 @@ export class CodenamesService {
   }
 
   private async generateWordsFromDictionary(): Promise<string[]> {
-    console.log('generateWordsFromDictionary');
-    const dictionaryPath = join(__dirname, '../assets/dictionary.txt');
+    const dictionaryPath = join(__dirname, '../codenames/assets/dictionary.txt');
     const dictionaryBuffer = await readFile(dictionaryPath);
     const dictionary = dictionaryBuffer.toString().replace(/\s/g, '').split(',');
     return dictionary.shuffle().slice(0, 25);
@@ -67,12 +65,6 @@ export class CodenamesService {
       }
       this.state.words.push({ color: 'black', isCovered: false, name: word });
     }
-  }
-
-  generateRandomLetter() {
-    const alphabet = 'abcdefghijklmnopqrstuvwxyz';
-
-    return alphabet[Math.floor(Math.random() * alphabet.length)];
   }
 
   getState(): State {
