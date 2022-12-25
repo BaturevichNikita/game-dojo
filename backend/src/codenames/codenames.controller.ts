@@ -1,14 +1,14 @@
 import { Controller, Get, Header } from '@nestjs/common';
-import { CodenamesService } from '../services/codenames.service';
+import { CodenamesService } from './codenames.service';
 
 @Controller('codenames')
-export class Codenamesontroller {
+export class CodenamesController {
   constructor(private readonly codenamesService: CodenamesService) {}
 
   @Get('start')
   @Header('Access-Control-Allow-Origin', '*')
   async getInitialState() {
-    const state = await this.codenamesService.getInitState();
+    const state = this.codenamesService.getState();
     return { state };
   }
 }
