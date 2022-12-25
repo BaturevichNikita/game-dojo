@@ -1,5 +1,5 @@
 import { createContext } from "react";
-import CodenamesService from "./codenames.service";
+import CodenamesService from "./Codenames.service";
 
 const CodenamesServiceContext = createContext(CodenamesService);
 export default CodenamesServiceContext;
