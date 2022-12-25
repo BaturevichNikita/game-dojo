@@ -28,6 +28,7 @@ export class CodenamesGateway implements OnGatewayConnection, OnGatewayDisconnec
   handleJoinRoom(@MessageBody() { room }: GameRoomDto, @ConnectedSocket() client: Socket) {
     client.join(room);
     console.log(`${client.id} joined to ${room}!`);
+    rooms.push(room);
     client.emit('joinedRoom', { room });
   }
 
