@@ -1,8 +1,8 @@
 import React, { useContext, useEffect } from "react";
 import { Link } from "react-router-dom";
-import GamesServiceContext from "../../services/games.context";
+import GamesServiceContext from "../Games.context";
 
-const Games = () => {
+const GamesList = () => {
   const [games, setGames] = React.useState([] as any[]);
   const gamesService = useContext(GamesServiceContext);
 
@@ -27,4 +27,4 @@ const Games = () => {
   );
 };
 
-export default Games;
+export default GamesList;
