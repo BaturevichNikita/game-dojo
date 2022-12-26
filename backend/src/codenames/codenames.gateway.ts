@@ -8,12 +8,26 @@ import {
   ConnectedSocket,
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
+import { GamesService } from 'src/games/games.service';
 import { GameMessageDto, GameRoomDto } from './dto/game.dto';
 
-const rooms = [];
+enum WSEvents {
+  CONNECT = 'clientConnected',
+  DISCONNECT = 'clientConnected',
+  JOIN_ROOM = 'joinRoom',
+  LEAVE_ROOM = 'leaveRoom',
+  MESSAGE = 'message',
+}
 
-@WebSocketGateway({ namespace: '/codenames' })
+const rooms = [];
+@WebSocketGateway({
+  namespace: '/codenames',
+  cors: {
+    origin: '*',
+  },
+})
 export class CodenamesGateway implements OnGatewayConnection, OnGatewayDisconnect {
+  constructor(private readonly gamesService: GamesService) {}
   @WebSocketServer() server: Server;
 
   handleConnection(client: Socket) {
@@ -24,25 +38,26 @@ export class CodenamesGateway implements OnGatewayConnection, OnGatewayDisconnec
     console.log(`${client.id} disconnected!`);
   }
 
-  @SubscribeMessage('joinRoom')
+  @SubscribeMessage(WSEvents.JOIN_ROOM)
   handleJoinRoom(@MessageBody() { room }: GameRoomDto, @ConnectedSocket() client: Socket) {
     client.join(room);
     console.log(`${client.id} joined to ${room}!`);
     rooms.push(room);
-    client.emit('joinedRoom', { room });
+    const state = this.gamesService.getStateByRoomCode(room);
+    client.emit(WSEvents.JOIN_ROOM, { state });
   }
 
-  @SubscribeMessage('leaveRoom')
+  @SubscribeMessage(WSEvents.LEAVE_ROOM)
   handleLeaveRoom(@MessageBody() { room }: GameRoomDto, @ConnectedSocket() client: Socket) {
     client.leave(room);
     console.log(`${client.id} leaved from ${room}!`);
-    client.emit('leavedRoom', { room });
+    client.emit(WSEvents.LEAVE_ROOM, { room });
   }
 
-  @SubscribeMessage('message')
+  @SubscribeMessage(WSEvents.MESSAGE)
   handleMessage(@MessageBody() { room, message }: GameMessageDto, @ConnectedSocket() client: Socket) {
     console.log({ room, message });
     console.log({ clientRooms: client.rooms });
-    this.server.to(room).emit('messageToClient', { message });
+    this.server.to(room).emit(WSEvents.MESSAGE, { message });
   }
 }
