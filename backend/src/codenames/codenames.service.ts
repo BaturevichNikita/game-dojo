@@ -56,7 +56,7 @@ export class CodenamesService implements OnModuleInit {
       }
       stateWords.push({ color: 'black', isCovered: false, name: word });
     }
-    return stateWords;
+    return stateWords.shuffle();
   }
 
   startNewGame() {

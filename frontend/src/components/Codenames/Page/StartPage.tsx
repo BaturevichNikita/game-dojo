@@ -9,7 +9,6 @@ import {
 
 import CodenamesServiceContext from "../Codenames.context";
 import Codenames from "../Game/Codenames";
-import { GameState } from "../Game/models/GameState";
 
 const CodenamesStartPage = () => {
   const codenamesService = useContext(CodenamesServiceContext);
