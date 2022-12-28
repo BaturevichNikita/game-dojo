@@ -3,13 +3,22 @@ import React from "react";
 import "./Card.css";
 
 interface Props {
-  word: string;
+  name: string;
+  color: string;
+  isCovered: boolean;
+  handleClick: any;
 }
 
-const CodenamesCard = ({ word }: Props) => {
+const CodenamesCard = ({ name, color, isCovered, handleClick }: Props) => {
   return (
-    <div className="codenames-card">
-      <p className="codenames-word">{word}</p>
+    <div
+      className="codenames-card"
+      onClick={() => {
+        console.log("clickOn: ", name);
+        handleClick(name);
+      }}
+    >
+      <p className="codenames-word">{`${name} ${color} ${isCovered}`}</p>
     </div>
   );
 };
