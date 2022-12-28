@@ -4,14 +4,22 @@ import Card from "../Card/Card";
 import "./Board.css";
 
 interface Props {
-  dictionary: Word[];
+  words: Word[];
+  handleClick: any;
 }
 
-const Board = ({ dictionary }: Props) => {
+const Board = ({ words, handleClick }: Props) => {
+  console.log("board: ", words);
   return (
     <div className="codenames-board">
-      {dictionary.map((w: Word) => (
-        <Card key={w.name} word={w.name} />
+      {words.map((w: Word) => (
+        <Card
+          key={w.name}
+          name={w.name}
+          color={w.color}
+          isCovered={w.isCovered}
+          handleClick={handleClick}
+        />
       ))}
     </div>
   );
