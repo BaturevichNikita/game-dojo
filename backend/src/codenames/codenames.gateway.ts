@@ -1,3 +1,4 @@
+import { UseFilters, UsePipes, ValidationPipe } from '@nestjs/common';
 import {
   WebSocketGateway,
   SubscribeMessage,
@@ -8,12 +9,29 @@ import {
   ConnectedSocket,
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
-import { GameMessageDto, GameRoomDto } from './dto/game.dto';
+import { WsExceptionFilter } from 'src/filter/websocketExceptionFilter';
+import { CodenamesService } from './codenames.service';
+import { JoinRoomDto, LeftRoomDto, MessageToRoomDto } from './dto/codenames.dto';
 
-const rooms = [];
+enum WSEvents {
+  CONNECT = 'clientConnected',
+  DISCONNECT = 'clientConnected',
+  JOIN_ROOM = 'joinRoom',
+  JOINED_ROOM = 'joinedRoom',
+  LEAVE_ROOM = 'leaveRoom',
+  LEFT_ROOM = 'leftRoom',
+  MESSAGE = 'message',
+}
 
-@WebSocketGateway({ namespace: '/codenames' })
+@UseFilters(WsExceptionFilter)
+@WebSocketGateway({
+  namespace: '/codenames',
+  cors: {
+    origin: '*',
+  },
+})
 export class CodenamesGateway implements OnGatewayConnection, OnGatewayDisconnect {
+  constructor(private readonly codenamesService: CodenamesService) {}
   @WebSocketServer() server: Server;
 
   handleConnection(client: Socket) {
@@ -24,25 +42,27 @@ export class CodenamesGateway implements OnGatewayConnection, OnGatewayDisconnec
     console.log(`${client.id} disconnected!`);
   }
 
-  @SubscribeMessage('joinRoom')
-  handleJoinRoom(@MessageBody() { room }: GameRoomDto, @ConnectedSocket() client: Socket) {
+  @UsePipes(new ValidationPipe())
+  @SubscribeMessage(WSEvents.JOIN_ROOM)
+  handleJoinRoom(@MessageBody() { room, team, nickname }: JoinRoomDto, @ConnectedSocket() client: Socket) {
+    const state = this.codenamesService.joinPlayerToRoom(room, client.id, nickname, team);
     client.join(room);
     console.log(`${client.id} joined to ${room}!`);
-    rooms.push(room);
-    client.emit('joinedRoom', { room });
+    client.emit(WSEvents.JOINED_ROOM, { state });
   }
 
-  @SubscribeMessage('leaveRoom')
-  handleLeaveRoom(@MessageBody() { room }: GameRoomDto, @ConnectedSocket() client: Socket) {
+  @SubscribeMessage(WSEvents.LEAVE_ROOM)
+  handleLeaveRoom(@MessageBody() { room }: LeftRoomDto, @ConnectedSocket() client: Socket) {
     client.leave(room);
     console.log(`${client.id} leaved from ${room}!`);
-    client.emit('leavedRoom', { room });
+    client.emit(WSEvents.LEFT_ROOM, { room });
   }
 
-  @SubscribeMessage('message')
-  handleMessage(@MessageBody() { room, message }: GameMessageDto, @ConnectedSocket() client: Socket) {
+  @UsePipes(new ValidationPipe())
+  @SubscribeMessage(WSEvents.MESSAGE)
+  handleMessage(@MessageBody() { room, message }: MessageToRoomDto, @ConnectedSocket() client: Socket) {
     console.log({ room, message });
     console.log({ clientRooms: client.rooms });
-    this.server.to(room).emit('messageToClient', { message });
+    this.server.to(room).emit(WSEvents.MESSAGE, { message });
   }
 }

@@ -1,10 +1,21 @@
 import { Injectable } from '@nestjs/common';
+import { generateRandomWord } from 'src/utils/strings';
 
 @Injectable()
 export class GamesService {
-  private readonly games = [{ id: 'codenames', name: 'Codenames' }];
+  private readonly availiableGames = [{ id: 'codenames', name: 'Codenames' }];
+  private launchedRooms: string[] = [];
 
-  getGames() {
-    return this.games;
+  getNewRoom() {
+    const room = generateRandomWord(4);
+    if (this.launchedRooms.includes(room)) {
+      return this.getNewRoom();
+    }
+    this.launchedRooms.push(room);
+    return room;
+  }
+
+  getAvailableGames() {
+    return this.availiableGames;
   }
 }

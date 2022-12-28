@@ -7,8 +7,8 @@ export class CodenamesController {
 
   @Get('start')
   @Header('Access-Control-Allow-Origin', '*')
-  async getInitialState() {
-    const state = this.codenamesService.getState();
+  startGame() {
+    const state = this.codenamesService.startNewGame();
     return { state };
   }
 }

@@ -1,81 +1,94 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, OnModuleInit } from '@nestjs/common';
+import { WsException } from '@nestjs/websockets';
 import { readFile } from 'fs/promises';
 import { join } from 'path';
-import { generateRandomWord } from 'src/utils/strings';
+import { GamesService } from 'src/games/games.service';
+import { CodenamesGame, CodenamesState, CodenamesTeams, Words } from './entities/codenames.entity';
 
-type Words = {
-  color: string;
-  name: string;
-  isCovered: boolean;
-};
+const MAX_WORDS_COUNT = 25;
+const FIRST_TURN_WORDS_COUNT = 9;
+const SECOND_TURN_WORDS_COUNT = 8;
+const PACIFIC_WORDS_COUNT = 7;
 
-type State = {
-  room: string;
-  players: string[];
-  words: Words[];
-};
 @Injectable()
-export class CodenamesService {
-  private state: State;
+export class CodenamesService implements OnModuleInit {
+  private readonly name: string = 'Codenames';
   private words: string[];
+  private launchedGames: CodenamesGame[] = [];
 
-  constructor() {
-    this.init();
+  constructor(private readonly gamesService: GamesService) {}
+
+  async onModuleInit() {
+    await this.loadWordsFromDictionary();
   }
 
-  async init() {
-    this.words = await this.generateWordsFromDictionary();
-    this.state = {
-      players: [],
-      room: generateRandomWord(4),
-      words: [],
-    };
-    this.fillStateWords();
-  }
-
-  private async generateWordsFromDictionary(): Promise<string[]> {
+  private async loadWordsFromDictionary(): Promise<void> {
     const dictionaryPath = join(__dirname, '../codenames/assets/dictionary.txt');
     const dictionaryBuffer = await readFile(dictionaryPath);
-    const dictionary = dictionaryBuffer.toString().replace(/\s/g, '').split(',');
-    return dictionary.shuffle().slice(0, 25);
+    this.words = dictionaryBuffer.toString().replace(/\s/g, '').split(',');
   }
 
-  private fillStateWords(): void {
+  private getStateWords(): Words[] {
     const sides = ['blue', 'red'];
-    const firstStep = sides[Math.floor(Math.random() * 2)];
-    const secondStep = sides.find((side) => side !== firstStep);
+    const firstTurn = sides[Math.floor(Math.random() * 2)];
+    const secondTurn = sides.find((side) => side !== firstTurn);
 
-    let [firstStepCount, secondStepCount, grayCount] = [0, 0, 0];
+    let [firstTurnCount, secondTurnCount, grayCount] = [0, 0, 0];
+    const randomWordsSet = this.words.shuffle().slice(0, MAX_WORDS_COUNT);
 
-    for (const word of this.words) {
-      if (firstStepCount < 9) {
-        this.state.words.push({ color: firstStep, isCovered: false, name: word });
-        firstStepCount++;
+    const stateWords: Words[] = [];
+
+    for (const word of randomWordsSet) {
+      if (firstTurnCount < FIRST_TURN_WORDS_COUNT) {
+        stateWords.push({ color: firstTurn, isCovered: false, name: word });
+        firstTurnCount++;
         continue;
       }
-      if (secondStepCount < 8) {
-        this.state.words.push({ color: secondStep, isCovered: false, name: word });
-        secondStepCount++;
+      if (secondTurnCount < SECOND_TURN_WORDS_COUNT) {
+        stateWords.push({ color: secondTurn, isCovered: false, name: word });
+        secondTurnCount++;
         continue;
       }
-      if (grayCount < 7) {
-        this.state.words.push({ color: 'gray', isCovered: false, name: word });
+      if (grayCount < PACIFIC_WORDS_COUNT) {
+        stateWords.push({ color: 'gray', isCovered: false, name: word });
         grayCount++;
         continue;
       }
-      this.state.words.push({ color: 'black', isCovered: false, name: word });
+      stateWords.push({ color: 'black', isCovered: false, name: word });
     }
+    return stateWords;
   }
 
-  getState(): State {
-    return this.state;
+  startNewGame() {
+    const state: CodenamesState = {
+      players: [],
+      words: this.getStateWords(),
+    };
+    const room = this.gamesService.getNewRoom();
+    this.launchedGames.push({ name: this.name, room, state });
+    //TODO: return just room when frontend webhook is done
+    console.log(this.launchedGames);
+    return { room, ...state };
   }
 
-  openWord(wordName: string) {
-    for (const word of this.state.words) {
-      if (word.name === wordName) {
-        word.isCovered = true;
-      }
+  getStateForRoom(room: string): CodenamesState {
+    const game = this.launchedGames.find((game) => game.room === room);
+    if (!game) {
+      throw new WsException(`There is no game for ${room} room!`);
     }
+    return game.state;
+  }
+
+  joinPlayerToRoom(room: string, id: string, nickname: string, team: CodenamesTeams): CodenamesState {
+    const state = this.getStateForRoom(room);
+    if (!state) {
+      throw new WsException(`There is no state for ${room} room!`);
+    }
+    const isNewPlayer = !state.players.find((player) => player.id === id);
+    if (isNewPlayer) {
+      state.players.push({ id, nickname, team });
+    }
+    console.log(this.launchedGames[0].state.players);
+    return state;
   }
 }

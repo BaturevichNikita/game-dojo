@@ -8,7 +8,7 @@ export class GamesController {
   @Get()
   @Header('Access-Control-Allow-Origin', '*')
   async getGames() {
-    const games = await this.gamesService.getGames();
+    const games = this.gamesService.getAvailableGames();
     return { games };
   }
 }
