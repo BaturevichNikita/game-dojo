@@ -66,9 +66,8 @@ export class CodenamesService implements OnModuleInit {
     };
     const room = this.gamesService.getNewRoom();
     this.launchedGames.push({ name: this.name, room, state });
-    //TODO: return just room when frontend webhook is done
-    console.log(this.launchedGames);
-    return { room, ...state };
+    console.log('Launched games:', this.launchedGames);
+    return room;
   }
 
   getStateForRoom(room: string): CodenamesState {
@@ -84,11 +83,26 @@ export class CodenamesService implements OnModuleInit {
     if (!state) {
       throw new WsException(`There is no state for ${room} room!`);
     }
+
+    const isNicknameAlreadyTaken = state.players.find((player) => player.nickname === nickname);
+    if (isNicknameAlreadyTaken) {
+      throw new WsException(`Nickname ${nickname} has been already taken`);
+    }
+
     const isNewPlayer = !state.players.find((player) => player.id === id);
     if (isNewPlayer) {
       state.players.push({ id, nickname, team });
     }
-    console.log(this.launchedGames[0].state.players);
+    console.log({ state });
     return state;
+  }
+
+  leavePlayerFromRoom(id: string) {
+    for (const { state } of this.launchedGames) {
+      const isPlayerExists = state.players.find((player) => player.id === id);
+      if (isPlayerExists) {
+        state.players = state.players.filter((player) => player.id !== id);
+      }
+    }
   }
 }

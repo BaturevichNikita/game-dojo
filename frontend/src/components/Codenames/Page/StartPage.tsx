@@ -1,14 +1,9 @@
-import React, { Suspense, useContext, useState } from "react";
+import {  useContext } from "react";
 import {
   useNavigate,
   useLocation,
-  Router,
-  Route,
-  Routes,
 } from "react-router-dom";
-
 import CodenamesServiceContext from "../Codenames.context";
-import Codenames from "../Game/Codenames";
 
 const CodenamesStartPage = () => {
   const codenamesService = useContext(CodenamesServiceContext);
@@ -18,9 +13,9 @@ const CodenamesStartPage = () => {
   const handleStartClick = async (event: any) => {
     event.preventDefault();
     console.log("click");
-    const state = await codenamesService.getInitGameState();
+    const room = await codenamesService.getInitGameState();
 
-    navigate(`${location.pathname}/${state.room ? state.room : "error"}`);
+    navigate(`${location.pathname}/${room}`);
   };
 
   return (

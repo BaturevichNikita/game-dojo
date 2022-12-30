@@ -1,5 +1,3 @@
-import { GameState } from "./GameState";
-
-export interface GameStateResponse {
-  state: GameState;
+export interface StartedGameResponse {
+  room: string;
 }

@@ -1,13 +1,14 @@
-import axios from "axios";
-import { GameState, GameStateResponse } from "./models";
+import axios from 'axios';
+import { StartedGameResponse } from './models';
 
 class CodenamesService {
-  async getInitGameState(): Promise<GameState> {
-    const response = await axios<GameStateResponse>({
-      method: "GET",
-      url: "http://localhost:3000/codenames/start",
+  async getInitGameState(): Promise<string> {
+    const response = await axios<StartedGameResponse>({
+      method: 'GET',
+      url: 'http://localhost:3000/codenames/start',
     });
-    return response.data.state;
+    console.log(response.data);
+    return response.data.room;
   }
 }
 
