@@ -1,4 +1,3 @@
-import React from "react";
 import { Word } from "../../models";
 import Card from "../Card/Card";
 import "./Board.css";

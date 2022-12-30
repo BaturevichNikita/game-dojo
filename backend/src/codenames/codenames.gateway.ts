@@ -39,6 +39,7 @@ export class CodenamesGateway implements OnGatewayConnection, OnGatewayDisconnec
   }
 
   handleDisconnect(client: Socket) {
+    this.codenamesService.leavePlayerFromRoom(client.id);
     console.log(`${client.id} disconnected!`);
   }
 

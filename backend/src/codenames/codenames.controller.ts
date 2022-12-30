@@ -8,7 +8,7 @@ export class CodenamesController {
   @Get('start')
   @Header('Access-Control-Allow-Origin', '*')
   startGame() {
-    const state = this.codenamesService.startNewGame();
-    return { state };
+    const room = this.codenamesService.startNewGame();
+    return { room };
   }
 }
