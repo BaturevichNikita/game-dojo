@@ -16,7 +16,7 @@ const CodenamesCard = ({ name, color, isCovered, handleClick }: Props) => {
         handleClick(name);
       }}
     >
-      <p className="codenames-word">{`${name} ${color} ${isCovered}`}</p>
+      <p className="codenames-word">{`${name}`}</p>
     </div>
   );
 };
