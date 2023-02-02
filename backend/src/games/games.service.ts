@@ -6,7 +6,7 @@ export class GamesService {
   private readonly availiableGames = [{ id: 'codenames', name: 'Codenames' }];
   private launchedRooms: string[] = [];
 
-  getNewRoom() {
+  getNewRoom(): string {
     const room = generateRandomWord(4);
     if (this.launchedRooms.includes(room)) {
       return this.getNewRoom();

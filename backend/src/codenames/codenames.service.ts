@@ -59,15 +59,13 @@ export class CodenamesService implements OnModuleInit {
     return stateWords.shuffle();
   }
 
-  startNewGame() {
+  startNewGame(room: string): void {
     const state: CodenamesState = {
       players: [],
       words: this.getStateWords(),
     };
-    const room = this.gamesService.getNewRoom();
     this.launchedGames.push({ name: this.name, room, state });
     console.log('Launched games:', this.launchedGames);
-    return room;
   }
 
   getStateForRoom(room: string): CodenamesState {
@@ -76,6 +74,17 @@ export class CodenamesService implements OnModuleInit {
       throw new WsException(`There is no game for ${room} room!`);
     }
     return game.state;
+  }
+
+  openCardInRoom(room: string, card: string): void {
+    const state = this.getStateForRoom(room);
+    for (const word of state.words) {
+      if (word.name === card) {
+        console.log(`Oppening card ${card}...`);
+
+        word.isCovered = true;
+      }
+    }
   }
 
   joinPlayerToRoom(room: string, id: string, nickname: string, team: CodenamesTeams): CodenamesState {
@@ -103,6 +112,12 @@ export class CodenamesService implements OnModuleInit {
       if (isPlayerExists) {
         state.players = state.players.filter((player) => player.id !== id);
       }
+    }
+  }
+
+  printLaunchedGames() {
+    for (const game of this.launchedGames) {
+      console.log(game);
     }
   }
 }
